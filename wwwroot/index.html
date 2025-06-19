@@ -1,0 +1,275 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Объявления России</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon"></span>
+                <h1>Объявления России</h1>
+            </div>
+            <div class="search">
+                <input type="text" id="searchInput" placeholder="Найти телефон, квартиру или цену...">
+                <button id="searchButton">Найти</button>
+            </div>
+            <p class="search-hint">Можно искать по названию, описанию или цифрам</p>
+            <nav class="nav">
+                <a href="#" class="nav-link active" id="homeLink">Главная</a>
+                <a href="#" class="nav-link" id="addLink">Добавить</a>
+                <a href="#" class="nav-link" id="favoritesLink">
+                    Избранное
+                    <span id="favoriteCounter" class="counter"></span>
+                </a>
+                <a href="#" class="nav-link" id="userCabinetLink">Личный кабинет</a>
+                <a href="#" class="nav-link" id="notificationsLink">
+                    <span class="notification-icon">🔔</span>
+                    <span id="notificationCounter" class="counter"></span>
+                </a>
+                <a href="#" class="nav-link" id="authLink">Войти</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="categories">
+                <button class="category-btn active" data-category="">Все</button>
+                <button class="category-btn" data-category="Техника">Техника</button>
+                <button class="category-btn" data-category="Недвижимость">Недвижимость</button>
+                <button class="category-btn" data-category="Транспорт">Транспорт</button>
+                <button class="category-btn" data-category="Другое">Другое</button>
+            </div>
+            <div class="ads-grid" id="adsContainer"></div>
+        </div>
+    </main>
+
+    <!-- Модальное окно просмотра объявления -->
+    <div id="adModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-gallery">
+                <div class="main-image">
+                    <img id="modalMainImage" src="" alt="">
+                </div>
+            </div>
+            <div class="modal-info">
+                <h2 id="modalTitle"></h2>
+                <div class="price" id="modalPrice"></div>
+                <div class="meta">
+                    <span id="modalDate"></span>
+                    <span id="modalViews"></span>
+                    <span id="modalId"></span>
+                </div>
+                <div class="description" id="modalDescription"></div>
+                <div class="seller-info">
+                    <div class="seller-avatar">👤</div>
+                    <div class="seller-details">
+                        <div class="seller-name" id="sellerName"></div>
+                        <div class="seller-since" id="sellerSince"></div>
+                    </div>
+                    <button class="show-phone" id="showPhoneBtn">Показать телефон</button>
+                </div>
+                <div class="location" id="modalLocation"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления объявления -->
+    <div id="addAdModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Добавить объявление</h2>
+                <form id="addAdForm">
+                    <div class="form-group">
+                        <label for="adTitle">Заголовок</label>
+                        <input type="text" id="adTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adDescription">Описание</label>
+                        <textarea id="adDescription" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="adPrice">Цена (₽)</label>
+                        <input type="number" id="adPrice" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adCategory">Категория</label>
+                        <select id="adCategory" name="category" required>
+                            <option value="Техника">Техника</option>
+                            <option value="Недвижимость">Недвижимость</option>
+                            <option value="Транспорт">Транспорт</option>
+                            <option value="Другое">Другое</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adLocation">Местоположение</label>
+                        <input type="text" id="adLocation" name="location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adImage">Изображение</label>
+                        <input type="file" id="adImage" name="image" accept="image/*">
+                        <div class="image-preview" id="imagePreview">
+                            <img id="previewImage" src="#" alt="Предпросмотр" style="display: none; max-height: 200px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Опубликовать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно редактирования объявления -->
+    <div id="editAdModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Редактировать объявление</h2>
+                <form id="editAdForm" onsubmit="submitEditForm(event)">
+                    <input type="hidden" id="editAdUserId" name="userId">
+                    <div class="form-group">
+                        <label for="editAdTitle">Заголовок</label>
+                        <input type="text" id="editAdTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdDescription">Описание</label>
+                        <textarea id="editAdDescription" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdPrice">Цена (₽)</label>
+                        <input type="number" id="editAdPrice" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdCategory">Категория</label>
+                        <select id="editAdCategory" name="category" required>
+                            <option value="1">Техника</option>
+                            <option value="2">Недвижимость</option>
+                            <option value="3">Транспорт</option>
+                            <option value="4">Другое</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdLocation">Местоположение</label>
+                        <input type="text" id="editAdLocation" name="location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdImage">Изображение</label>
+                        <input type="file" id="editAdImage" name="image" accept="image/*">
+                        <div class="image-preview">
+                            <img id="editPreviewImage" src="#" alt="Предпросмотр" style="display: none; max-height: 200px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно личного кабинета -->
+    <div id="userCabinetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUserCabinetModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Личный кабинет</h2>
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name" id="cabinetUserName"></div>
+                        <div class="user-since" id="cabinetUserSince"></div>
+                    </div>
+                </div>
+
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalAdsCount">0</span>
+                        <span class="stat-label">Объявлений</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="totalViewsCount">0</span>
+                        <span class="stat-label">Просмотров</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="favoritesCount">0</span>
+                        <span class="stat-label">В избранном</span>
+                    </div>
+                </div>
+
+                <h3>Мои объявления</h3>
+                <div class="user-ads-grid" id="userAdsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Вход в аккаунт</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required placeholder="Введите ваш email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" required placeholder="Введите ваш пароль">
+                    </div>
+                    <button type="submit" class="submit-btn">Войти</button>
+                    <p style="text-align: center; margin-top: 15px;">
+                        Нет аккаунта?
+                        <a href="#" onclick="openRegisterModal(); event.preventDefault();">Зарегистрироваться</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Регистрация</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerUsername">Имя пользователя</label>
+                        <input type="text" id="registerUsername" required placeholder="Придумайте имя пользователя">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" required placeholder="Введите ваш email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" id="registerPassword" required placeholder="Придумайте пароль">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPhone">Телефон</label>
+                        <input type="tel" id="registerPhone" required placeholder="+7 (XXX) XXX-XX-XX">
+                    </div>
+                    <button type="submit" class="submit-btn">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNotificationsModal()">&times;</span>
+            <div class="modal-info">
+                <h2>Уведомления</h2>
+                <button id="markAllAsReadBtn" class="submit-btn">Пометить все прочитанными</button>
+                <div id="notificationsList" class="notifications-list"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
